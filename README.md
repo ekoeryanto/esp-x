@@ -1,9 +1,17 @@
-# 0x3 ESP8266 Project
+# 0x3 ESP8266 Project Template
 
-A professional, modern ESP8266 project featuring WiFi Manager, OTA updates, and a beautiful web interface.
+A professional, modern ESP8266 project template featuring WiFi Manager, OTA updates, and a beautiful web interface. Designed to be easily adapted for any ESP8266 board and project.
 
 ## 🚀 Features
 
+### Template Features
+- **Board-Agnostic Design**: Works with any ESP8266 board
+- **Easy Customization**: Simple configuration via `config.h`
+- **Automated Setup**: Interactive setup script for quick start
+- **Professional Structure**: Clean, modular, and maintainable code
+- **Complete Documentation**: Comprehensive guides and examples
+
+### Core Features
 - **WiFi Manager**: Easy WiFi configuration without hardcoding credentials
 - **OTA Updates**: Over-the-air firmware updates via web interface
 - **Web Control Panel**: Beautiful, responsive web interface for monitoring and control
@@ -25,9 +33,20 @@ The device provides a modern, responsive web interface accessible at the device'
 
 ## 🔧 Hardware Requirements
 
-- **Board**: Wemos D1 Mini (ESP8266)
-- **Power**: 5V via USB or 3.3V
-- **Built-in LED**: Used for status indication
+**Supported ESP8266 Boards:**
+- **Wemos D1 Mini** (default, recommended)
+- **NodeMCU v2** 
+- **ESP-12E/ESP-12F**
+- **ESP-01** (limited features due to memory constraints)
+- **ESP-07**
+- Any ESP8266-based board
+
+**Power Requirements:**
+- 5V via USB or 3.3V direct
+- Built-in LED used for status indication
+
+**Board Selection:**
+The template is designed to work with any ESP8266 board. Simply update the `board` setting in `platformio.ini` and adjust the LED pin in `config.h` if needed.
 
 ## 📦 Dependencies
 
@@ -39,14 +58,26 @@ The project uses the following libraries (automatically installed by PlatformIO)
 - `ottowinter/ESPAsyncWebServer-esphome` - Async web server
 - `ottowinter/AsyncTCP-esphome` - Async TCP support
 
-## 🛠️ Installation & Setup
+## � Quick Start with Template
 
-### 1. Clone and Open Project
-
+### Option 1: Automated Setup (Recommended)
 ```bash
-git clone <repository-url>
-cd "Basic Wemos D1"
+# Run the setup script for guided configuration
+./setup.sh
 ```
+
+### Option 2: Manual Setup
+1. Copy this template to your project directory
+2. Customize `include/config.h` with your project details
+3. Select your board in `platformio.ini`
+4. Build and upload
+
+### Option 3: Use Template File
+1. Copy `include/config_template.h` to `include/config.h`
+2. Edit the copied file with your settings
+3. Follow the instructions in the template file
+
+See `TEMPLATE_USAGE.md` for detailed instructions.
 
 ### 2. Build and Upload
 
@@ -150,21 +181,26 @@ The built-in LED indicates system status:
 ## 🏗️ Project Structure
 
 ```
-├── include/                 # Header files
-│   ├── config.h            # Configuration constants
-│   ├── system_manager.h    # System management
-│   ├── wifi_manager.h      # WiFi management
-│   ├── web_server.h        # Web server handling
-│   └── ota_handler.h       # OTA update handling
-├── src/                    # Source files
-│   ├── main.cpp           # Main application
-│   ├── system_manager.cpp # System management implementation
-│   ├── wifi_manager.cpp   # WiFi management implementation
-│   ├── web_server.cpp     # Web server implementation
-│   └── ota_handler.cpp    # OTA handling implementation
-├── lib/                   # Custom libraries (if any)
-├── test/                  # Unit tests
-└── platformio.ini        # PlatformIO configuration
+├── include/                    # Header files
+│   ├── config.h               # Configuration constants (customize this)
+│   ├── config_template.h      # Template configuration file
+│   ├── system_manager.h       # System management
+│   ├── wifi_manager.h         # WiFi management
+│   ├── web_server.h           # Web server handling
+│   └── ota_handler.h          # OTA update handling
+├── src/                       # Source files
+│   ├── main.cpp              # Main application
+│   ├── system_manager.cpp    # System management implementation
+│   ├── wifi_manager.cpp      # WiFi management implementation
+│   ├── web_server.cpp        # Web server implementation
+│   └── ota_handler.cpp       # OTA handling implementation
+├── lib/                      # Custom libraries (if any)
+├── test/                     # Unit tests
+├── setup.sh                  # Automated setup script
+├── TEMPLATE_USAGE.md         # Template usage guide
+├── README.md                 # This file
+├── CHANGELOG.md              # Version history
+└── platformio.ini           # PlatformIO configuration
 ```
 
 ## ⚙️ Configuration
