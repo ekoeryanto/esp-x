@@ -1,13 +1,13 @@
-# 0x3 ESP8266 Template Usage Guide
+# 0x3 ESP32 Template Usage Guide
 
-This is a professional ESP8266 project template designed to be easily adapted for any ESP8266 board and project.
+This is a professional ESP32 project template designed to be easily adapted for any ESP32 board and project.
 
 ## 🚀 Quick Start
 
 ### 1. Copy Template
 ```bash
 # Copy this template to your new project directory
-cp -r "0x3-ESP8266-Template" "your-new-project"
+cp -r "0x3-ESP32-Template" "your-new-project"
 cd "your-new-project"
 ```
 
@@ -206,7 +206,7 @@ This template is designed to be self-contained and documentation-driven. For add
 1. Check the main `README.md` for detailed usage
 2. Review code comments for implementation details
 3. Consult PlatformIO documentation for platform-specific issues
-4. ESP8266 Arduino Core documentation for hardware-specific features
+4. ESP32 Arduino Core documentation for hardware-specific features
 
 ---
 

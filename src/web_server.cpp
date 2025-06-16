@@ -1,10 +1,13 @@
 #include "web_server.h"
+#include "ota_handler.h"
 #include "system_manager.h"
 
 // Global instance
 WebServerHandler webServer;
 
-WebServerHandler::WebServerHandler() : server(WEB_SERVER_PORT) {
+WebServerHandler::WebServerHandler() 
+    : server(WEB_SERVER_PORT)
+{
     serverStarted = false;
 }
 
@@ -18,142 +21,102 @@ bool WebServerHandler::initialize() {
 }
 
 void WebServerHandler::setupRoutes() {
-    // Root page
-    server.on("/", [this]() { handleRoot(); });
+    // AsyncWebServer routes
+    server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        String html = generateWebPage();
+        request->send(200, "text/html", html);
+    });
     
-    // Status API endpoint
-    server.on("/api/status", [this]() { handleStatus(); });
+    server.on("/api/status", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        DynamicJsonDocument doc(1024);
+        doc["project"] = PROJECT_NAME;
+        doc["version"] = PROJECT_VERSION;
+        doc["author"] = PROJECT_AUTHOR;
+        doc["status"] = systemMgr.getStatusString();
+        doc["uptime"] = systemMgr.getUptimeString();
+        doc["freeHeap"] = ESP.getFreeHeap();
+        doc["chipId"] = systemMgr.getChipId();
+        
+        if (wifiMgr.isConnected()) {
+            doc["wifi"]["connected"] = true;
+            doc["wifi"]["ssid"] = wifiMgr.getSSID();
+            doc["wifi"]["ip"] = wifiMgr.getIP();
+            doc["wifi"]["rssi"] = wifiMgr.getRSSI();
+        } else {
+            doc["wifi"]["connected"] = false;
+        }
+        
+        doc["ota"]["enabled"] = otaHandler.isEnabled();
+        doc["ota"]["status"] = otaHandler.getStatus();
+        doc["ota"]["url"] = otaHandler.getUpdateURL();
+        
+        String response;
+        serializeJson(doc, response);
+        request->send(200, "application/json", response);
+    });
     
-    // Configuration endpoint
-    server.on("/api/config", [this]() { handleConfig(); });
+    server.on("/api/config", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        DynamicJsonDocument doc(512);
+        doc["hostname"] = HOSTNAME;
+        doc["ap_password"] = AP_PASSWORD;
+        doc["ota_username"] = OTA_USERNAME;
+        doc["web_port"] = WEB_SERVER_PORT;
+        doc["debug_enabled"] = DEBUG_ENABLED;
+        
+        String response;
+        serializeJson(doc, response);
+        request->send(200, "application/json", response);
+    });
     
-    // Restart endpoint
-    server.on("/api/restart", HTTP_POST, [this]() { handleRestart(); });
+    server.on("/api/restart", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{\"message\":\"Restarting...\"}");
+        delay(1000);
+        systemMgr.restart();
+    });
     
-    // Reset WiFi settings endpoint
-    server.on("/api/reset", HTTP_POST, [this]() { handleReset(); });
+    server.on("/api/reset", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{\"message\":\"Resetting WiFi settings...\"}");
+        delay(1000);
+        wifiMgr.resetWiFiSettings();
+        systemMgr.restart();
+    });
     
-    // 404 handler
-    server.onNotFound([this]() { handleNotFound(); });
+    server.onNotFound([this](AsyncWebServerRequest *request) {
+        request->send(404, "application/json", "{\"error\":\"Not found\"}");
+    });
 }
 
 void WebServerHandler::begin() {
-    if (!serverStarted) {
-        server.begin();
-        serverStarted = true;
-        Serial.println("[WebServer] Web server started");
-        Serial.printf("[WebServer] Access at: http://%s\n", WiFi.localIP().toString().c_str());
-    }
+    // Start AsyncWebServer
+    server.begin();
+    serverStarted = true;
+    Serial.println("[WebServer] Web server started");
 }
 
 void WebServerHandler::end() {
     if (serverStarted) {
-        server.stop();
+        server.end();
         serverStarted = false;
         Serial.println("[WebServer] Web server stopped");
     }
 }
 
 void WebServerHandler::handle() {
-    if (serverStarted) {
-        server.handleClient();
-    }
+    // AsyncWebServer handles requests automatically
+    // No need to call handle() for ESP32
 }
 
 bool WebServerHandler::isRunning() {
     return serverStarted;
 }
 
-ESP8266WebServer* WebServerHandler::getServer() {
+AsyncWebServer* WebServerHandler::getServer() {
     return &server;
 }
 
-void WebServerHandler::handleRoot() {
-    String html = generateWebPage();
-    server.send(200, "text/html", html);
-}
 
-void WebServerHandler::handleStatus() {
-    DynamicJsonDocument doc(1024);
-    
-    doc["project"] = PROJECT_NAME;
-    doc["version"] = PROJECT_VERSION;
-    doc["author"] = PROJECT_AUTHOR;
-    doc["status"] = systemMgr.getStatusString();
-    doc["uptime"] = systemMgr.getUptimeString();
-    doc["freeHeap"] = systemMgr.getFreeHeap();
-    doc["chipId"] = ESP.getChipId();
-    
-    if (wifiMgr.isConnected()) {
-        doc["wifi"]["connected"] = true;
-        doc["wifi"]["ssid"] = wifiMgr.getSSID();
-        doc["wifi"]["ip"] = wifiMgr.getIP();
-        doc["wifi"]["rssi"] = wifiMgr.getRSSI();
-    } else {
-        doc["wifi"]["connected"] = false;
-    }
-    
-    doc["ota"]["enabled"] = otaHandler.isEnabled();
-    doc["ota"]["status"] = otaHandler.getStatus();
-    doc["ota"]["url"] = otaHandler.getUpdateURL();
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-}
 
-void WebServerHandler::handleConfig() {
-    DynamicJsonDocument doc(512);
-    
-    doc["hostname"] = HOSTNAME;
-    doc["ap_password"] = AP_PASSWORD;
-    doc["ota_username"] = OTA_USERNAME;
-    doc["web_port"] = WEB_SERVER_PORT;
-    doc["debug_enabled"] = DEBUG_ENABLED;
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-}
-
-void WebServerHandler::handleRestart() {
-    DynamicJsonDocument doc(256);
-    doc["message"] = "Restarting device...";
-    doc["success"] = true;
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-    
-    delay(1000);
-    systemMgr.restart();
-}
-
-void WebServerHandler::handleReset() {
-    DynamicJsonDocument doc(256);
-    doc["message"] = "WiFi settings reset. Device will restart...";
-    doc["success"] = true;
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-    
-    delay(1000);
-    wifiMgr.resetWiFiSettings();
-    systemMgr.restart();
-}
-
-void WebServerHandler::handleNotFound() {
-    DynamicJsonDocument doc(256);
-    doc["error"] = "Not Found";
-    doc["message"] = "The requested resource was not found on this server.";
-    doc["path"] = server.uri();
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(404, "application/json", response);
-}
-
+// Web page generation
 String WebServerHandler::generateWebPage() {
     String html = "<!DOCTYPE html><html><head>";
     html += "<meta charset='UTF-8'>";
@@ -186,7 +149,7 @@ String WebServerHandler::generateWebPage() {
     html += "<div class='container'>";
     html += "<div class='header'>";
     html += "<h1>" + String(PROJECT_NAME) + "</h1>";
-    html += "<p>ESP8266 Control Panel - Version " + String(PROJECT_VERSION) + "</p>";
+    html += "<p>ESP32 Control Panel - Version " + String(PROJECT_VERSION) + "</p>";
     html += "</div>";
     
     html += "<div class='content'>";

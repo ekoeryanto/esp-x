@@ -1,15 +1,16 @@
 #ifndef OTA_HANDLER_H
 #define OTA_HANDLER_H
 
-#include <ESP8266WebServer.h>
-#include <ESP8266HTTPUpdateServer.h>
-#include <ESP8266WiFi.h>
+#include <ESPAsyncWebServer.h>
+#include <ElegantOTA.h>
+#include <WiFi.h>
+#include <Update.h>
+
 #include "config.h"
 
 class OTAHandler {
 private:
-    ESP8266WebServer* server;
-    ESP8266HTTPUpdateServer* updateServer;
+    AsyncWebServer* server;  // Use AsyncWebServer with ElegantOTA async mode
     bool otaEnabled;
     bool updateInProgress;
     
@@ -20,7 +21,7 @@ public:
     OTAHandler();
     
     // Main functions
-    bool initialize(ESP8266WebServer* webServer);
+    bool initialize(AsyncWebServer* webServer);  // Use AsyncWebServer
     void handle();
     void begin();
     void end();

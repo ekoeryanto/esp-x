@@ -1,4 +1,4 @@
-# 0x3 ESP8266 Template Configuration
+# 0x3 ESP32 Template Configuration
 # Copy this file to config_template.h and customize for your project
 
 #ifndef CONFIG_TEMPLATE_H
@@ -72,34 +72,29 @@
 // BOARD-SPECIFIC CONFIGURATIONS
 // ============================================================================
 
-#ifdef ARDUINO_ESP8266_WEMOS_D1MINI
-    // Wemos D1 Mini specific settings
-    #define BOARD_NAME "Wemos D1 Mini"
+#ifdef ARDUINO_ESP32_DEV
+    // ESP32 Dev Module
+    #define BOARD_NAME "ESP32 Dev Module"
     #define BOARD_LED_PIN 2
     #define BOARD_FLASH_SIZE "4MB"
-#elif defined(ARDUINO_ESP8266_NODEMCU)
-    // NodeMCU specific settings
-    #define BOARD_NAME "NodeMCU"
+#elif defined(ARDUINO_ESP32_WROVER_KIT)
+    // ESP32 WROVER KIT
+    #define BOARD_NAME "ESP32 WROVER KIT"
     #define BOARD_LED_PIN 2
     #define BOARD_FLASH_SIZE "4MB"
-#elif defined(ARDUINO_ESP8266_ESP12)
-    // ESP-12E specific settings
-    #define BOARD_NAME "ESP-12E"
+#elif defined(ARDUINO_ESP32C3_DEV)
+    // ESP32-C3 Dev Module
+    #define BOARD_NAME "ESP32-C3 Dev Module"
+    #define BOARD_LED_PIN 7
+    #define BOARD_FLASH_SIZE "4MB"
+#elif defined(ARDUINO_ESP32S2_DEV)
+    // ESP32-S2 Dev Module
+    #define BOARD_NAME "ESP32-S2 Dev Module"
     #define BOARD_LED_PIN 2
     #define BOARD_FLASH_SIZE "4MB"
-#elif defined(ARDUINO_ESP8266_ESP01)
-    // ESP-01 specific settings
-    #define BOARD_NAME "ESP-01"
-    #define BOARD_LED_PIN 1
-    #define BOARD_FLASH_SIZE "1MB"
-    // Reduce features for limited memory
-    #undef HEARTBEAT_INTERVAL
-    #define HEARTBEAT_INTERVAL 60000          // Longer interval for ESP-01
-    #undef MAX_LOG_ENTRIES
-    #define MAX_LOG_ENTRIES 10                // Fewer log entries
 #else
-    // Generic ESP8266 settings
-    #define BOARD_NAME "ESP8266"
+    // Generic ESP32 settings
+    #define BOARD_NAME "ESP32"
     #define BOARD_LED_PIN 2
     #define BOARD_FLASH_SIZE "Unknown"
 #endif
@@ -109,8 +104,8 @@
 // ============================================================================
 
 // Enable features based on available flash memory
-#if defined(ARDUINO_ESP8266_ESP01)
-    // Limited features for ESP-01
+#if defined(ESP32_MEMORY_CONSTRAINED)
+    // Limited features for memory constrained ESP32 variants
     #define ENABLE_WEB_LOGGING false
     #define ENABLE_DETAILED_STATUS false
     #define ENABLE_FILE_SYSTEM false

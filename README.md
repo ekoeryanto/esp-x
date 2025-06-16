@@ -1,19 +1,20 @@
-# 0x3 ESP8266 Project Template
+# 0x3 ESP32 Universal Template
 
-A professional, modern ESP8266 project template featuring WiFi Manager, OTA updates, and a beautiful web interface. Designed to be easily adapted for any ESP8266 board and project.
+A professional, modern ESP32 project template featuring WiFi Manager, OTA updates via ElegantOTA in async mode, and a beautiful web interface. Designed to be easily adapted for any ESP32 board and project.
 
 ## 🚀 Features
 
 ### Template Features
-- **Board-Agnostic Design**: Works with any ESP8266 board
+- **Board-Agnostic Design**: Works with any ESP32 board (ESP32, ESP32-S2, ESP32-S3, ESP32-C3)
 - **Easy Customization**: Simple configuration via `config.h`
-- **Automated Setup**: Interactive setup script for quick start
+- **Automated Setup**: All necessary configurations in one place
 - **Professional Structure**: Clean, modular, and maintainable code
 - **Complete Documentation**: Comprehensive guides and examples
 
 ### Core Features
 - **WiFi Manager**: Easy WiFi configuration without hardcoding credentials
-- **OTA Updates**: Over-the-air firmware updates via web interface
+- **Async Web Server**: Using ESPAsyncWebServer for responsive interface
+- **OTA Updates**: Over-the-air firmware updates via ElegantOTA in async mode
 - **Web Control Panel**: Beautiful, responsive web interface for monitoring and control
 - **RESTful API**: JSON API endpoints for system information and control
 - **Status LED**: Visual indication of system status via built-in LED
@@ -33,20 +34,22 @@ The device provides a modern, responsive web interface accessible at the device'
 
 ## 🔧 Hardware Requirements
 
-**Supported ESP8266 Boards:**
-- **Wemos D1 Mini** (default, recommended)
-- **NodeMCU v2** 
-- **ESP-12E/ESP-12F**
-- **ESP-01** (limited features due to memory constraints)
-- **ESP-07**
-- Any ESP8266-based board
+**Supported ESP32 Boards:**
+- **ESP32 DevKit V1** (default, most common)
+- **Generic ESP32**
+- **NodeMCU-32S**
+- **Wemos LOLIN D32/D32 Pro**
+- **ESP32-S2**
+- **ESP32-S3**
+- **ESP32-C3**
+- Any ESP32-based board
 
 **Power Requirements:**
 - 5V via USB or 3.3V direct
 - Built-in LED used for status indication
 
 **Board Selection:**
-The template is designed to work with any ESP8266 board. Simply update the `board` setting in `platformio.ini` and adjust the LED pin in `config.h` if needed.
+The template is designed to work with any ESP32 board. Simply update the `board` setting in `platformio.ini` and adjust the LED pin in `config.h` if needed.
 
 ## 📦 Dependencies
 
@@ -54,9 +57,11 @@ The project uses the following libraries (automatically installed by PlatformIO)
 
 - `tzapu/WiFiManager` - WiFi configuration management
 - `bblanchon/ArduinoJson` - JSON handling for API
-- `ayushsharma82/AsyncElegantOTA` - OTA update functionality
-- `ottowinter/ESPAsyncWebServer-esphome` - Async web server
-- `ottowinter/AsyncTCP-esphome` - Async TCP support
+- `AsyncTCP` - Async TCP support for ESP32
+- `ESPAsyncWebServer` - Async web server
+- `ayushsharma82/ElegantOTA` - OTA update functionality (in async mode)
+- `Update` - Core ESP32 update library
+- `Ticker` - Timer functionality
 
 ## � Quick Start with Template
 
@@ -98,17 +103,27 @@ pio device monitor
 
 1. **First Boot**: Device will create a WiFi access point named `0x3-esp_[ChipID]`
 2. **Connect to AP**: Use password `0x3Config`
-3. **Configure WiFi**: Browser will automatically open configuration page, or go to `192.168.4.1`
-4. **Enter Credentials**: Provide your WiFi network credentials
-5. **Save & Restart**: Device will restart and connect to your network
+3. **Configure WiFi**: Follow the captive portal to set up your WiFi credentials
+4. **Access Web Interface**: Once connected, access the web interface at the device's IP address
 
-### 4. Access Web Interface
+## 🔄 OTA Updates
 
-After successful WiFi connection:
+After initial setup, you can upload firmware updates over-the-air:
 
-1. Check serial monitor for IP address
-2. Open web browser and navigate to the device IP
-3. Enjoy the beautiful control panel!
+1. Access the web interface at the device's IP address
+2. Click on "OTA Update" or navigate to `/update`
+3. Use username: `0x3` and password: `0x3Update`
+4. Select your firmware file (.bin) and click upload
+
+Alternatively, configure PlatformIO for OTA updates:
+
+```ini
+# In platformio.ini, uncomment and update:
+upload_protocol = espota
+upload_port = 192.168.1.100  # Your device IP
+upload_flags = 
+    --auth=0x3Update
+```
 
 ## 🌐 API Endpoints
 
@@ -181,26 +196,22 @@ The built-in LED indicates system status:
 ## 🏗️ Project Structure
 
 ```
-├── include/                    # Header files
-│   ├── config.h               # Configuration constants (customize this)
-│   ├── config_template.h      # Template configuration file
-│   ├── system_manager.h       # System management
-│   ├── wifi_manager.h         # WiFi management
-│   ├── web_server.h           # Web server handling
-│   └── ota_handler.h          # OTA update handling
-├── src/                       # Source files
-│   ├── main.cpp              # Main application
-│   ├── system_manager.cpp    # System management implementation
-│   ├── wifi_manager.cpp      # WiFi management implementation
-│   ├── web_server.cpp        # Web server implementation
-│   └── ota_handler.cpp       # OTA handling implementation
-├── lib/                      # Custom libraries (if any)
-├── test/                     # Unit tests
-├── setup.sh                  # Automated setup script
-├── TEMPLATE_USAGE.md         # Template usage guide
-├── README.md                 # This file
-├── CHANGELOG.md              # Version history
-└── platformio.ini           # PlatformIO configuration
+├── include/                  # Header files
+│   ├── config.h             # Configuration constants (customize this)
+│   ├── system_manager.h     # System management
+│   ├── wifi_manager.h       # WiFi management
+│   ├── web_server.h         # Web server handling
+│   └── ota_handler.h        # OTA update handling
+├── src/                     # Source files
+│   ├── main.cpp            # Main application
+│   ├── system_manager.cpp  # System management implementation
+│   ├── wifi_manager.cpp    # WiFi management implementation
+│   ├── web_server.cpp      # Web server implementation
+│   └── ota_handler.cpp     # OTA handling implementation
+├── lib/                    # Custom libraries (if any)
+├── test/                   # Unit tests
+├── README.md               # This file
+└── platformio.ini         # PlatformIO configuration
 ```
 
 ## ⚙️ Configuration
@@ -270,18 +281,14 @@ The system provides comprehensive monitoring:
 - Consider implementing authentication for API endpoints
 - Regular firmware updates recommended
 
-## 📄 License
+## � License
 
-This project is created by 0x3. Feel free to use and modify according to your needs.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
+## � Author
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
-
-## 📞 Support
-
-For support and questions, please open an issue in the project repository.
+Created by 0x3 (http://github.com/0x3)
 
 ---
 
-**0x3 ESP Project v1.0.0** - Professional ESP8266 Development Platform
+Made with ❤️ by 0x3 - Professional ESP32 Framework

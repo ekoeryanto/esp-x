@@ -24,10 +24,10 @@ bool WiFiManagerHandler::initialize() {
     wifiManager.setDebugOutput(DEBUG_ENABLED);
     
     // Set custom AP name
-    String apName = String(HOSTNAME) + "_" + String(ESP.getChipId(), HEX);
+    String apName = String(HOSTNAME) + "_" + String(systemMgr.getChipId(), HEX);
     
     // Set hostname
-    WiFi.hostname(HOSTNAME);
+    WiFi.setHostname(HOSTNAME);
     
     Serial.println("[WiFiMgr] WiFi Manager initialized");
     return true;
@@ -37,7 +37,7 @@ bool WiFiManagerHandler::autoConnect() {
     Serial.println("[WiFiMgr] Attempting auto-connect...");
     systemMgr.setStatus(SYSTEM_WIFI_CONNECTING);
     
-    String apName = String(HOSTNAME) + "_" + String(ESP.getChipId(), HEX);
+    String apName = String(HOSTNAME) + "_" + String(systemMgr.getChipId(), HEX);
     
     if (wifiManager.autoConnect(apName.c_str(), AP_PASSWORD)) {
         Serial.println("[WiFiMgr] WiFi connected successfully!");
@@ -57,7 +57,7 @@ bool WiFiManagerHandler::autoConnect() {
 bool WiFiManagerHandler::startConfigPortal() {
     Serial.println("[WiFiMgr] Starting configuration portal...");
     
-    String apName = String(HOSTNAME) + "_CONFIG_" + String(ESP.getChipId(), HEX);
+    String apName = String(HOSTNAME) + "_CONFIG_" + String(systemMgr.getChipId(), HEX);
     
     if (wifiManager.startConfigPortal(apName.c_str(), AP_PASSWORD)) {
         Serial.println("[WiFiMgr] Configuration portal completed successfully");

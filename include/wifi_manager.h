@@ -2,7 +2,7 @@
 #define WIFI_MANAGER_H
 
 #include <WiFiManager.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include "config.h"
 
 class WiFiManagerHandler {

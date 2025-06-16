@@ -2,7 +2,7 @@
 #define SYSTEM_MANAGER_H
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <Ticker.h>
 #include "config.h"
 
@@ -55,6 +55,7 @@ public:
     // Memory functions
     uint32_t getFreeHeap();
     uint8_t getHeapFragmentation();
+    uint64_t getChipId();
     
     // Info functions
     String getChipInfo();

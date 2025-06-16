@@ -1,7 +1,7 @@
 /**
- * 0x3 ESP8266 Project
+ * 0x3 ESP32 Project
  * 
- * A modern, well-structured ESP8266 project featuring:
+ * A modern, well-structured ESP32 project featuring:
  * - WiFi Manager for easy configuration
  * - OTA (Over-The-Air) updates
  * - Web-based control panel
@@ -11,7 +11,7 @@
  * Author: 0x3
  * Version: 1.0.0
  * 
- * Hardware: Wemos D1 Mini (ESP8266)
+ * Hardware: ESP32 (board-agnostic)
  * 
  * Features:
  * - Automatic WiFi connection with fallback to AP mode
@@ -65,7 +65,7 @@ void setup() {
         webServer.begin();
         
         // Initialize OTA handler
-        if (!otaHandler.initialize(webServer.getServer())) {
+        if (!otaHandler.initialize(webServer.getServer())) {  // Uses AsyncWebServer
             Serial.println("[Main] Failed to initialize OTA handler!");
         } else {
             Serial.println("[Main] OTA handler initialized successfully");
@@ -74,7 +74,7 @@ void setup() {
         systemMgr.setStatus(SYSTEM_RUNNING);
         Serial.println("[Main] System initialization complete!");
         Serial.printf("[Main] Web interface: http://%s\n", WiFi.localIP().toString().c_str());
-        Serial.printf("[Main] OTA updates: http://%s/update\n", WiFi.localIP().toString().c_str());
+        Serial.printf("[Main] OTA updates: %s\n", otaHandler.getUpdateURL().c_str());
         
     } else {
         Serial.println("[Main] WiFi connection failed!");

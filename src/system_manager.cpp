@@ -116,20 +116,25 @@ uint32_t SystemManager::getFreeHeap() {
 }
 
 uint8_t SystemManager::getHeapFragmentation() {
-    return ESP.getHeapFragmentation();
+    // ESP32 doesn't have getHeapFragmentation, return 0
+    return 0;
+}
+
+uint64_t SystemManager::getChipId() {
+    return ESP.getEfuseMac();
 }
 
 String SystemManager::getChipInfo() {
     String info = "";
-    info += "Chip ID: 0x" + String(ESP.getChipId(), HEX) + "\n";
-    info += "Flash Chip ID: 0x" + String(ESP.getFlashChipId(), HEX) + "\n";
-    info += "Flash Size: " + String(ESP.getFlashChipRealSize()) + " bytes\n";
+    info += "Chip ID: 0x" + String(getChipId(), HEX) + "\n";
+    
+    // ESP32-specific chip information
+    info += "Chip Model: " + String(ESP.getChipModel()) + "\n";
+    info += "Chip Revision: " + String(ESP.getChipRevision()) + "\n";
+    info += "Flash Size: " + String(ESP.getFlashChipSize()) + " bytes\n";
     info += "Flash Speed: " + String(ESP.getFlashChipSpeed()) + " Hz\n";
     info += "CPU Frequency: " + String(ESP.getCpuFreqMHz()) + " MHz\n";
     info += "SDK Version: " + String(ESP.getSdkVersion()) + "\n";
-    info += "Core Version: " + String(ESP.getCoreVersion()) + "\n";
-    info += "Boot Version: " + String(ESP.getBootVersion()) + "\n";
-    info += "Boot Mode: " + String(ESP.getBootMode()) + "\n";
     
     return info;
 }
@@ -159,7 +164,7 @@ void SystemManager::printWelcomeBanner() {
     Serial.println("║                                                              ║");
     Serial.printf("║                      Created by %s                         ║\n", PROJECT_AUTHOR);
     Serial.println("║                                                              ║");
-    Serial.println("║              ESP8266 with WiFi Manager & OTA                ║");
+    Serial.println("║              ESP32 with WiFi Manager & OTA                 ║");
     Serial.println("║                                                              ║");
     Serial.println("╚══════════════════════════════════════════════════════════════╝");
     Serial.println();

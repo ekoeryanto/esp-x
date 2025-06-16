@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 0x3 ESP8266 Template Setup Script
+# 0x3 ESP32 Template Setup Script
 # This script helps you quickly set up a new project based on the template
 
 set -e
 
-echo "🚀 0x3 ESP8266 Template Setup"
+echo "🚀 0x3 ESP32 Template Setup"
 echo "=============================="
 echo
 
@@ -44,7 +44,7 @@ echo "📋 Project Configuration"
 echo "------------------------"
 
 # Get project details
-PROJECT_NAME=$(prompt_with_default "Project Name" "MyESP8266Project")
+PROJECT_NAME=$(prompt_with_default "Project Name" "MyESP32Project")
 PROJECT_VERSION=$(prompt_with_default "Project Version" "1.0.0")
 PROJECT_AUTHOR=$(prompt_with_default "Author/Organization" "$(whoami)")
 
@@ -80,11 +80,11 @@ fi
 echo
 echo "🔧 Board Selection"
 echo "------------------"
-echo "Select your ESP8266 board:"
-echo "1) Wemos D1 Mini (default)"
-echo "2) NodeMCU v2"
-echo "3) ESP-12E"
-echo "4) ESP-01 (1MB)"
+echo "Select your ESP32 board:"
+echo "1) ESP32 Dev Module (default)"
+echo "2) ESP32 WROVER Kit"
+echo "3) ESP32-C3 Dev Module"
+echo "4) ESP32-S2 Dev Module"
 echo "5) Custom"
 
 read -p "Board choice [1]: " BOARD_CHOICE
@@ -92,29 +92,28 @@ BOARD_CHOICE=${BOARD_CHOICE:-1}
 
 case $BOARD_CHOICE in
     1)
-        BOARD="d1_mini"
-        BOARD_NAME="Wemos D1 Mini"
+        BOARD="esp32dev"
+        BOARD_NAME="ESP32 Dev Module"
         LED_PIN=2
         ;;
     2)
-        BOARD="nodemcuv2"
-        BOARD_NAME="NodeMCU v2"
+        BOARD="esp-wrover-kit"
+        BOARD_NAME="ESP32 WROVER Kit"
         LED_PIN=2
         ;;
     3)
-        BOARD="esp12e"
-        BOARD_NAME="ESP-12E"
-        LED_PIN=2
+        BOARD="esp32-c3-devkitm-1"
+        BOARD_NAME="ESP32-C3 Dev Module"
+        LED_PIN=7
         ;;
     4)
-        BOARD="esp01_1m"
-        BOARD_NAME="ESP-01"
-        LED_PIN=1
-        echo "⚠️  ESP-01 has limited memory. Some features may be reduced."
+        BOARD="esp32-s2-saola-1"
+        BOARD_NAME="ESP32-S2 Dev Module"
+        LED_PIN=2
         ;;
     5)
-        BOARD=$(prompt_with_default "Custom board identifier" "d1_mini")
-        BOARD_NAME=$(prompt_with_default "Custom board name" "Custom ESP8266")
+        BOARD=$(prompt_with_default "Custom board identifier" "esp32dev")
+        BOARD_NAME=$(prompt_with_default "Custom board name" "Custom ESP32")
         LED_PIN=$(prompt_with_default "LED pin number" "2")
         ;;
 esac

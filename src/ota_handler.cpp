@@ -6,24 +6,23 @@ OTAHandler otaHandler;
 
 OTAHandler::OTAHandler() {
     server = nullptr;
-    updateServer = nullptr;
     otaEnabled = false;
     updateInProgress = false;
 }
 
-bool OTAHandler::initialize(ESP8266WebServer* webServer) {
+bool OTAHandler::initialize(AsyncWebServer* webServer) {
     if (!webServer) {
         Serial.println("[OTA] Error: WebServer pointer is null");
         return false;
     }
     
     server = webServer;
-    updateServer = new ESP8266HTTPUpdateServer();
     
     Serial.println("[OTA] Initializing OTA handler...");
     
-    // Initialize HTTP Update Server
-    updateServer->setup(server, "/update", OTA_USERNAME, OTA_PASSWORD);
+    // Initialize ElegantOTA in async mode with AsyncWebServer
+    ElegantOTA.begin(server, OTA_USERNAME, OTA_PASSWORD);
+    ElegantOTA.setAutoReboot(true);
     
     otaEnabled = true;
     Serial.println("[OTA] OTA handler initialized successfully");
@@ -34,17 +33,32 @@ bool OTAHandler::initialize(ESP8266WebServer* webServer) {
 }
 
 void OTAHandler::setupOTACallbacks() {
-    // HTTP Update Server handles callbacks internally
+    // ElegantOTA has built-in callbacks for progress, start, end events
+    ElegantOTA.onStart([]() {
+        Serial.println("[OTA] Update Start");
+    });
+    
+    ElegantOTA.onProgress([](size_t current, size_t total) {
+        Serial.printf("[OTA] Progress: %u%%\r", (current / (total / 100)));
+    });
+    
+    ElegantOTA.onEnd([](bool success) {
+        if (success) {
+            Serial.println("\n[OTA] Update finished successfully!");
+        } else {
+            Serial.println("\n[OTA] Update failed!");
+        }
+    });
 }
 
 void OTAHandler::handle() {
-    if (otaEnabled && server) {
-        server->handleClient();
-    }
+    // ElegantOTA in async mode handles requests automatically
+    // Just need to call loop for any background tasks
+    ElegantOTA.loop();
 }
 
 void OTAHandler::begin() {
-    if (server && updateServer) {
+    if (server) {
         otaEnabled = true;
         Serial.println("[OTA] OTA service started");
     }
