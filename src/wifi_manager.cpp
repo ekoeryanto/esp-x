@@ -1,5 +1,6 @@
 #include "wifi_manager.h"
 #include "system_manager.h"
+#include <ArduinoJson.h>
 
 // Global instance
 WiFiManagerHandler wifiMgr;
@@ -44,6 +45,18 @@ bool WiFiManagerHandler::autoConnect() {
         Serial.printf("[WiFiMgr] IP Address: %s\n", WiFi.localIP().toString().c_str());
         Serial.printf("[WiFiMgr] SSID: %s\n", WiFi.SSID().c_str());
         Serial.printf("[WiFiMgr] RSSI: %d dBm\n", WiFi.RSSI());
+        Serial.printf("[WiFiMgr] MAC Address: %s\n", WiFi.macAddress().c_str());
+        
+        // Set hostname again after connection
+        WiFi.hostname(HOSTNAME);
+        
+        // Setup mDNS if enabled
+        if (MDNS_ENABLED) {
+            setupMDNS();
+        }
+        
+        // Call connected callback
+        wifiConnectedCallback();
         
         systemMgr.setStatus(SYSTEM_WIFI_CONNECTED);
         return true;
@@ -102,6 +115,46 @@ int WiFiManagerHandler::getRSSI() {
     return WiFi.RSSI();
 }
 
+String WiFiManagerHandler::getMACAddress() {
+    return WiFi.macAddress();
+}
+
+String WiFiManagerHandler::getHostname() {
+    return WiFi.hostname();
+}
+
+String WiFiManagerHandler::getNetworkInfo(bool asJson) {
+    if (asJson) {
+        DynamicJsonDocument doc(512);
+        doc["connected"] = isConnected();
+        doc["ssid"] = getSSID();
+        doc["ip"] = getIP();
+        doc["rssi"] = getRSSI();
+        doc["mac"] = getMACAddress();
+        doc["hostname"] = getHostname();
+        doc["gateway"] = WiFi.gatewayIP().toString();
+        doc["subnet"] = WiFi.subnetMask().toString();
+        doc["dns"] = WiFi.dnsIP().toString();
+        doc["bssid"] = WiFi.BSSIDstr();
+        doc["channel"] = WiFi.channel();
+        
+        String result;
+        serializeJson(doc, result);
+        return result;
+    } else {
+        String info = "SSID: " + getSSID() + "\n";
+        info += "IP: " + getIP() + "\n";
+        info += "RSSI: " + String(getRSSI()) + " dBm\n";
+        info += "MAC: " + getMACAddress() + "\n";
+        info += "Hostname: " + getHostname() + "\n";
+        info += "Gateway: " + WiFi.gatewayIP().toString() + "\n";
+        info += "Subnet: " + WiFi.subnetMask().toString() + "\n";
+        info += "DNS: " + WiFi.dnsIP().toString() + "\n";
+        info += "Channel: " + String(WiFi.channel());
+        return info;
+    }
+}
+
 void WiFiManagerHandler::setConfigPortalTimeout(int timeout) {
     wifiManager.setConfigPortalTimeout(timeout);
 }
@@ -122,6 +175,20 @@ void WiFiManagerHandler::resetAllSettings() {
     delay(1000);
 }
 
+bool WiFiManagerHandler::setupMDNS() {
+    if (MDNS.begin(HOSTNAME)) {
+        Serial.printf("[WiFiMgr] mDNS responder started. Device accessible at http://%s.local\n", HOSTNAME);
+        
+        // Add service to mDNS
+        MDNS.addService(MDNS_SERVICE, MDNS_PROTOCOL, WEB_SERVER_PORT);
+        
+        return true;
+    } else {
+        Serial.println("[WiFiMgr] Failed to start mDNS responder");
+        return false;
+    }
+}
+
 // Static callback functions
 void WiFiManagerHandler::saveConfigCallback() {
     Serial.println("[WiFiMgr] Configuration should be saved");
@@ -134,4 +201,22 @@ void WiFiManagerHandler::configModeCallback(WiFiManager *myWiFiManager) {
     Serial.printf("[WiFiMgr] Config AP SSID: %s\n", myWiFiManager->getConfigPortalSSID().c_str());
     
     systemMgr.setStatus(SYSTEM_WIFI_FAILED);
+}
+
+void WiFiManagerHandler::wifiConnectedCallback() {
+    Serial.println("[WiFiMgr] WiFi connection callback triggered");
+    
+    // Update full network information
+    Serial.println("[WiFiMgr] Extended Network Information:");
+    
+    // Since this is static, we need to create a temporary info string
+    String info = "SSID: " + WiFi.SSID() + "\n";
+    info += "IP: " + WiFi.localIP().toString() + "\n";
+    info += "RSSI: " + String(WiFi.RSSI()) + " dBm\n";
+    info += "MAC: " + WiFi.macAddress() + "\n";
+    info += "Hostname: " + WiFi.hostname() + "\n";
+    info += "Gateway: " + WiFi.gatewayIP().toString() + "\n";
+    info += "Subnet: " + WiFi.subnetMask().toString();
+    
+    Serial.println(info);
 }

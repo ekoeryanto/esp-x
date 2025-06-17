@@ -12,8 +12,11 @@ enum SystemStatus {
     SYSTEM_WIFI_CONNECTED,
     SYSTEM_WIFI_FAILED,
     SYSTEM_RUNNING,
+    SYSTEM_READY,
     SYSTEM_OTA_UPDATE,
-    SYSTEM_ERROR
+    SYSTEM_ERROR,
+    SYSTEM_UPDATING,
+    SYSTEM_UPDATED
 };
 
 class SystemManager {
@@ -46,6 +49,7 @@ public:
     String getStatusString();
     unsigned long getUptime();
     String getUptimeString();
+    String getChipId();
     
     // System functions
     void restart();

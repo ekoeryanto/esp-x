@@ -6,7 +6,6 @@ OTAHandler otaHandler;
 
 OTAHandler::OTAHandler() {
     server = nullptr;
-    updateServer = nullptr;
     otaEnabled = false;
     updateInProgress = false;
 }
@@ -22,8 +21,20 @@ bool OTAHandler::initialize(ESP8266WebServer* webServer) {
     
     Serial.println("[OTA] Initializing OTA handler...");
     
-    // Initialize HTTP Update Server
+    // Initialize HTTPUpdateServer with authentication
     updateServer->setup(server, "/update", OTA_USERNAME, OTA_PASSWORD);
+    
+    // Set up status tracking
+    updateInProgress = false;
+    systemMgr.setStatus(SYSTEM_READY);
+    Serial.println("[OTA] Update server initialized");
+    
+    // Add a status update callback that the web server can use
+    server->on("/update/status", HTTP_GET, [this]() {
+        String status = getStatus();
+        String json = "{\"status\":\"" + status + "\",\"enabled\":" + String(otaEnabled ? "true" : "false") + "}";
+        server->send(200, "application/json", json);
+    });
     
     otaEnabled = true;
     Serial.println("[OTA] OTA handler initialized successfully");
@@ -34,17 +45,16 @@ bool OTAHandler::initialize(ESP8266WebServer* webServer) {
 }
 
 void OTAHandler::setupOTACallbacks() {
-    // HTTP Update Server handles callbacks internally
+    // Callbacks are set up in the initialize method
 }
 
 void OTAHandler::handle() {
-    if (otaEnabled && server) {
-        server->handleClient();
-    }
+    // ElegantOTA handles requests asynchronously - no need to call handleClient()
+    // This method is kept for compatibility with the existing architecture
 }
 
 void OTAHandler::begin() {
-    if (server && updateServer) {
+    if (server) {
         otaEnabled = true;
         Serial.println("[OTA] OTA service started");
     }

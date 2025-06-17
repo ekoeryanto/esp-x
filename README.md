@@ -1,23 +1,24 @@
-# 0x3 ESP8266 Project Template
+# 0x3 Advanced ESP8266 Project
 
-A professional, modern ESP8266 project template featuring WiFi Manager, OTA updates, and a beautiful web interface. Designed to be easily adapted for any ESP8266 board and project.
+A professional, modern ESP8266 project featuring advanced capabilities including WiFi Manager, versioned API endpoints, mDNS service discovery, OTA updates, and a beautiful web interface. This project represents an evolution of the basic ESP8266 template with enhanced features and optimizations.
 
 ## 🚀 Features
 
-### Template Features
-- **Board-Agnostic Design**: Works with any ESP8266 board
-- **Easy Customization**: Simple configuration via `config.h`
-- **Automated Setup**: Interactive setup script for quick start
-- **Professional Structure**: Clean, modular, and maintainable code
-- **Complete Documentation**: Comprehensive guides and examples
+### Advanced Features
+- **mDNS Support**: Local network service discovery
+- **Versioned API**: RESTful API with versioned endpoints (/api/v1/*)
+- **Enhanced Telemetry**: Comprehensive system metrics and diagnostics
+- **JSON Logging**: Structured logging for better diagnostics
+- **Optimized Memory Usage**: Balanced for both features and performance
+- **Advanced Error Handling**: Improved stability and error recovery
 
 ### Core Features
 - **WiFi Manager**: Easy WiFi configuration without hardcoding credentials
 - **OTA Updates**: Over-the-air firmware updates via web interface
 - **Web Control Panel**: Beautiful, responsive web interface for monitoring and control
-- **RESTful API**: JSON API endpoints for system information and control
-- **Status LED**: Visual indication of system status via built-in LED
-- **Modular Architecture**: Clean, maintainable code structure
+- **RESTful API**: Comprehensive JSON API endpoints for system information and control
+- **Status LED**: Visual indication of system status with enhanced states
+- **Modular Architecture**: Clean, maintainable code structure with improved organization
 - **Professional Branding**: Consistent 0x3 branding throughout
 
 ## 📱 Web Interface
@@ -54,9 +55,11 @@ The project uses the following libraries (automatically installed by PlatformIO)
 
 - `tzapu/WiFiManager` - WiFi configuration management
 - `bblanchon/ArduinoJson` - JSON handling for API
-- `ayushsharma82/AsyncElegantOTA` - OTA update functionality
-- `ottowinter/ESPAsyncWebServer-esphome` - Async web server
-- `ottowinter/AsyncTCP-esphome` - Async TCP support
+- `ESP8266WebServer` - Built-in web server functionality
+- `ESP8266HTTPUpdateServer` - Built-in OTA updates
+- `ESP8266WiFi` - WiFi functionality
+- `ESP8266mDNS` - mDNS for service discovery
+- `Ticker` - System timing and callbacks
 
 ## � Quick Start with Template
 

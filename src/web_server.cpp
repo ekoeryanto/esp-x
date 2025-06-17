@@ -18,23 +18,123 @@ bool WebServerHandler::initialize() {
 }
 
 void WebServerHandler::setupRoutes() {
-    // Root page
-    server.on("/", [this]() { handleRoot(); });
+    // Root page (HTML interface)
+    server.on("/", [this]() {
+        String html = generateWebPage();
+        server.send(200, "text/html", html);
+    });
     
     // Status API endpoint
-    server.on("/api/status", [this]() { handleStatus(); });
+    server.on(String(API_ENDPOINT_PREFIX) + "/status", [this]() {
+        DynamicJsonDocument doc(1024);
+        doc["project"] = PROJECT_NAME;
+        doc["version"] = PROJECT_VERSION;
+        doc["author"] = PROJECT_AUTHOR;
+        doc["status"] = systemMgr.getStatusString();
+        doc["uptime"] = systemMgr.getUptimeString();
+        doc["freeHeap"] = ESP.getFreeHeap();
+        doc["chipId"] = systemMgr.getChipId();
+        
+        if (wifiMgr.isConnected()) {
+            doc["wifi"]["connected"] = true;
+            doc["wifi"]["ssid"] = wifiMgr.getSSID();
+            doc["wifi"]["ip"] = wifiMgr.getIP();
+            doc["wifi"]["rssi"] = wifiMgr.getRSSI();
+            doc["wifi"]["hostname"] = wifiMgr.getHostname();
+            doc["wifi"]["mac"] = wifiMgr.getMACAddress();
+        } else {
+            doc["wifi"]["connected"] = false;
+        }
+        
+        doc["ota"]["enabled"] = otaHandler.isEnabled();
+        doc["ota"]["status"] = otaHandler.getStatus();
+        doc["ota"]["url"] = otaHandler.getUpdateURL();
+        
+        String response;
+        serializeJson(doc, response);
+        server.send(200, "application/json", response);
+    });
     
     // Configuration endpoint
-    server.on("/api/config", [this]() { handleConfig(); });
+    server.on(String(API_ENDPOINT_PREFIX) + "/config", [this]() {
+        DynamicJsonDocument doc(512);
+        
+        doc["hostname"] = HOSTNAME;
+        doc["ap_password"] = AP_PASSWORD;
+        doc["ota_username"] = OTA_USERNAME;
+        doc["web_port"] = WEB_SERVER_PORT;
+        doc["debug_enabled"] = DEBUG_ENABLED;
+        doc["mdns_enabled"] = MDNS_ENABLED;
+        doc["mdns_service"] = MDNS_SERVICE;
+        doc["heartbeat_interval"] = HEARTBEAT_INTERVAL;
+        doc["json_logging"] = ENABLE_JSON_LOGGING;
+        
+        String response;
+        serializeJson(doc, response);
+        server.send(200, "application/json", response);
+    });
     
     // Restart endpoint
-    server.on("/api/restart", HTTP_POST, [this]() { handleRestart(); });
+    server.on(String(API_ENDPOINT_PREFIX) + "/restart", [this]() {
+        DynamicJsonDocument doc(256);
+        doc["message"] = "Restarting device...";
+        doc["success"] = true;
+        
+        String response;
+        serializeJson(doc, response);
+        server.send(200, "application/json", response);
+        
+        // Schedule restart after response is sent
+        delay(1000);
+        systemMgr.restart();
+    });
     
     // Reset WiFi settings endpoint
-    server.on("/api/reset", HTTP_POST, [this]() { handleReset(); });
+    server.on(String(API_ENDPOINT_PREFIX) + "/reset", [this]() {
+        DynamicJsonDocument doc(256);
+        doc["message"] = "WiFi settings reset. Device will restart...";
+        doc["success"] = true;
+        
+        String response;
+        serializeJson(doc, response);
+        server.send(200, "application/json", response);
+        
+        // Schedule reset after response is sent
+        delay(1000);
+        wifiMgr.resetWiFiSettings();
+        systemMgr.restart();
+    });
+    
+    // Add telemetry endpoint
+    server.on(String(API_ENDPOINT_PREFIX) + "/telemetry", [this]() {
+        DynamicJsonDocument doc(1024);
+        doc["uptime"] = systemMgr.getUptimeString();
+        doc["reset_reason"] = ESP.getResetReason();
+        doc["free_heap"] = ESP.getFreeHeap();
+        doc["heap_fragmentation"] = ESP.getHeapFragmentation();
+        doc["free_sketch_space"] = ESP.getFreeSketchSpace();
+        doc["sketch_size"] = ESP.getSketchSize();
+        doc["flash_chip_id"] = ESP.getFlashChipId();
+        doc["flash_chip_size"] = ESP.getFlashChipSize();
+        doc["sdk_version"] = ESP.getSdkVersion();
+        doc["cpu_freq"] = ESP.getCpuFreqMHz();
+        
+        String response;
+        serializeJson(doc, response);
+        server.send(200, "application/json", response);
+    });
     
     // 404 handler
-    server.onNotFound([this]() { handleNotFound(); });
+    server.onNotFound([this]() {
+        DynamicJsonDocument doc(256);
+        doc["error"] = "Not Found";
+        doc["message"] = "The requested resource was not found on this server.";
+        doc["path"] = server.uri();
+        
+        String response;
+        serializeJson(doc, response);
+        server.send(404, "application/json", response);
+    });
 }
 
 void WebServerHandler::begin() {
@@ -55,6 +155,7 @@ void WebServerHandler::end() {
 }
 
 void WebServerHandler::handle() {
+    // Handle incoming client requests
     if (serverStarted) {
         server.handleClient();
     }
@@ -68,91 +169,10 @@ ESP8266WebServer* WebServerHandler::getServer() {
     return &server;
 }
 
-void WebServerHandler::handleRoot() {
-    String html = generateWebPage();
-    server.send(200, "text/html", html);
-}
+// Individual handler methods are no longer needed as they're implemented
+// directly as lambda functions in setupRoutes()
 
-void WebServerHandler::handleStatus() {
-    DynamicJsonDocument doc(1024);
-    
-    doc["project"] = PROJECT_NAME;
-    doc["version"] = PROJECT_VERSION;
-    doc["author"] = PROJECT_AUTHOR;
-    doc["status"] = systemMgr.getStatusString();
-    doc["uptime"] = systemMgr.getUptimeString();
-    doc["freeHeap"] = systemMgr.getFreeHeap();
-    doc["chipId"] = ESP.getChipId();
-    
-    if (wifiMgr.isConnected()) {
-        doc["wifi"]["connected"] = true;
-        doc["wifi"]["ssid"] = wifiMgr.getSSID();
-        doc["wifi"]["ip"] = wifiMgr.getIP();
-        doc["wifi"]["rssi"] = wifiMgr.getRSSI();
-    } else {
-        doc["wifi"]["connected"] = false;
-    }
-    
-    doc["ota"]["enabled"] = otaHandler.isEnabled();
-    doc["ota"]["status"] = otaHandler.getStatus();
-    doc["ota"]["url"] = otaHandler.getUpdateURL();
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-}
-
-void WebServerHandler::handleConfig() {
-    DynamicJsonDocument doc(512);
-    
-    doc["hostname"] = HOSTNAME;
-    doc["ap_password"] = AP_PASSWORD;
-    doc["ota_username"] = OTA_USERNAME;
-    doc["web_port"] = WEB_SERVER_PORT;
-    doc["debug_enabled"] = DEBUG_ENABLED;
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-}
-
-void WebServerHandler::handleRestart() {
-    DynamicJsonDocument doc(256);
-    doc["message"] = "Restarting device...";
-    doc["success"] = true;
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-    
-    delay(1000);
-    systemMgr.restart();
-}
-
-void WebServerHandler::handleReset() {
-    DynamicJsonDocument doc(256);
-    doc["message"] = "WiFi settings reset. Device will restart...";
-    doc["success"] = true;
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(200, "application/json", response);
-    
-    delay(1000);
-    wifiMgr.resetWiFiSettings();
-    systemMgr.restart();
-}
-
-void WebServerHandler::handleNotFound() {
-    DynamicJsonDocument doc(256);
-    doc["error"] = "Not Found";
-    doc["message"] = "The requested resource was not found on this server.";
-    doc["path"] = server.uri();
-    
-    String response;
-    serializeJson(doc, response);
-    server.send(404, "application/json", response);
-}
+// All handler methods have been implemented as lambda functions in setupRoutes()
 
 String WebServerHandler::generateWebPage() {
     String html = "<!DOCTYPE html><html><head>";

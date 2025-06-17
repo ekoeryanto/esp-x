@@ -3,6 +3,7 @@
 
 #include <WiFiManager.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include "config.h"
 
 class WiFiManagerHandler {
@@ -14,6 +15,10 @@ private:
     // Callback functions
     static void saveConfigCallback();
     static void configModeCallback(WiFiManager *myWiFiManager);
+    static void wifiConnectedCallback();
+    
+    // mDNS functions
+    bool setupMDNS();
     
 public:
     WiFiManagerHandler();
@@ -29,6 +34,9 @@ public:
     String getSSID();
     String getIP();
     int getRSSI();
+    String getMACAddress();
+    String getHostname();
+    String getNetworkInfo(bool asJson = false);
     
     // Configuration functions
     void setConfigPortalTimeout(int timeout);

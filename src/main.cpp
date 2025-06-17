@@ -105,13 +105,11 @@ void loop() {
         lastWiFiCheck = millis();
     }
     
-    // Handle OTA updates
-    if (systemMgr.getStatus() == SYSTEM_RUNNING || systemMgr.getStatus() == SYSTEM_WIFI_CONNECTED) {
-        otaHandler.handle();
-    }
-    
-    // Handle web server (AsyncWebServer handles this automatically)
+    // Handle web server requests
     webServer.handle();
+    
+    // Handle OTA updates
+    otaHandler.handle();
     
     // Status updates
     if (millis() - lastStatusUpdate > STATUS_UPDATE_INTERVAL) {

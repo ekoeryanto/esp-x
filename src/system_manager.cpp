@@ -58,8 +58,11 @@ String SystemManager::getStatusString() {
         case SYSTEM_WIFI_CONNECTED: return "WiFi Connected";
         case SYSTEM_WIFI_FAILED:    return "WiFi Failed";
         case SYSTEM_RUNNING:        return "Running";
+        case SYSTEM_READY:          return "Ready";
         case SYSTEM_OTA_UPDATE:     return "OTA Update";
         case SYSTEM_ERROR:          return "Error";
+        case SYSTEM_UPDATING:       return "Updating";
+        case SYSTEM_UPDATED:        return "Updated";
         default:                    return "Unknown";
     }
 }
@@ -99,11 +102,13 @@ void SystemManager::restart() {
 void SystemManager::factoryReset() {
     Serial.println("[System] Performing factory reset...");
     
-    // Reset WiFi settings
-    wifiMgr.resetAllSettings();
-    
-    delay(2000);
-    restart();
+    // Reset settings and restart
+    delay(1000);
+    ESP.restart();
+}
+
+String SystemManager::getChipId() {
+    return String(ESP.getChipId(), HEX);
 }
 
 void SystemManager::enableDebug(bool enable) {
