@@ -60,7 +60,7 @@ All notable changes to this project will be documented in this file.
   - `/api/reset` - WiFi settings reset
 
 ### Technical Details
-- Built for ESP8266 (Wemos D1 Mini)
+- Built for ESP32 boards (ESP32, ESP32-S2, ESP32-S3, ESP32-C3)
 - Arduino framework with PlatformIO
 - Async web server for better performance
 - JSON API responses

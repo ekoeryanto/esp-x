@@ -208,6 +208,13 @@ The built-in LED indicates system status:
 │   ├── wifi_manager.cpp    # WiFi management implementation
 │   ├── web_server.cpp      # Web server implementation
 │   └── ota_handler.cpp     # OTA handling implementation
+├── tools/                   # Development tools
+│   ├── esp32_devtools.py  # Unified developer tools interface
+│   ├── memory_analyzer.py  # Memory usage analysis
+│   ├── spiffs_uploader.py  # SPIFFS filesystem management
+│   ├── config_generator.py # Configuration generator
+│   ├── serial_monitor_plus.py # Enhanced serial monitor
+│   └── wifi_scanner.py     # WiFi network scanner
 ├── lib/                    # Custom libraries (if any)
 ├── test/                   # Unit tests
 ├── README.md               # This file
@@ -244,6 +251,42 @@ Main configuration options in `include/config.h`:
 1. Update constants in `config.h`
 2. Modify web interface styling in `web_server.cpp`
 3. Update welcome banner in `system_manager.cpp`
+
+## 🔧 Development Tools
+
+This project includes a suite of specialized development tools in the `tools/` directory to enhance ESP32 development:
+
+### Memory Analyzer
+Analyze and optimize memory usage in your firmware:
+```bash
+./tools/esp32_devtools.py memory --elf .pio/build/esp32doit-devkit-v1/firmware.elf
+```
+
+### SPIFFS File Manager
+Build and upload web content to the ESP32 filesystem:
+```bash
+./tools/esp32_devtools.py spiffs --data ./data --upload
+```
+
+### Configuration Generator
+Interactive configuration tool to generate config.h:
+```bash
+./tools/esp32_devtools.py config --interactive
+```
+
+### Enhanced Serial Monitor
+Serial monitor with JSON parsing and data export:
+```bash
+./tools/esp32_devtools.py monitor --json --log output.txt
+```
+
+### WiFi Scanner
+Scan and analyze available WiFi networks:
+```bash
+./tools/esp32_devtools.py wifi --export wifi_scan.csv
+```
+
+See `tools/README.md` for detailed documentation of each tool.
 
 ## 🐛 Troubleshooting
 

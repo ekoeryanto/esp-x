@@ -38,7 +38,7 @@
 // HARDWARE CONFIGURATION - BOARD SPECIFIC
 // ============================================================================
 // LED Configuration (varies by board)
-// Wemos D1 Mini: 2, NodeMCU: 2 or 16, ESP-12E: 2, ESP-01: 1
+// ESP32 boards: Usually 2, ESP32-C3: 8, ESP32-S2/S3: Check your board
 #define LED_BUILTIN 2                         // Built-in LED pin
 #define STATUS_LED_PIN LED_BUILTIN            // Pin for status indication
 
