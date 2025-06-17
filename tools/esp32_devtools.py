@@ -13,6 +13,7 @@ Commands:
     config       - Generate configuration files
     monitor      - Enhanced serial monitoring with JSON support
     wifi         - Scan WiFi networks
+    test         - Run unit and integration tests
     help         - Show this help message
 
 Example:
@@ -28,6 +29,7 @@ import sys
 import argparse
 import subprocess
 from pathlib import Path
+from test_runner import run_tests, setup_test_parser
 
 # ANSI color codes for pretty output
 class Colors:
@@ -46,7 +48,7 @@ def parse_arguments():
         description='ESP32 Development Tools',
         usage=__doc__
     )
-    parser.add_argument('command', choices=['memory', 'spiffs', 'config', 'monitor', 'wifi', 'help'])
+    parser.add_argument('command', choices=['memory', 'spiffs', 'config', 'monitor', 'wifi', 'test', 'help'])
     
     # Parse just the first argument to determine the command
     args = parser.parse_args(sys.argv[1:2])
@@ -79,6 +81,15 @@ def main():
     if args.command == 'help':
         print_help()
         return 0
+    
+    # Handle test command separately
+    if args.command == 'test':
+        # Create a new parser for test-specific arguments
+        parser = argparse.ArgumentParser(description='Run ESP32 tests')
+        subparsers = parser.add_subparsers(dest='ignored')  # Just to match the structure
+        test_parser = setup_test_parser(subparsers)
+        test_args = test_parser.parse_args(sys.argv[2:])
+        return run_tests(test_args)
     
     # Map commands to tools
     tool_map = {

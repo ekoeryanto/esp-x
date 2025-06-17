@@ -83,6 +83,7 @@ Available commands:
 - `config` - Generate configuration files
 - `monitor` - Enhanced serial monitoring
 - `wifi` - Scan WiFi networks
+- `test` - Run unit and integration tests
 - `help` - Show help message
 
 ## 📝 Usage Examples
@@ -110,6 +111,27 @@ Available commands:
 ### WiFi Scanning
 ```bash
 ./tools/esp32_devtools.py wifi --format json --export wifi_scan.csv
+```
+
+### Test Runner
+
+Run unit and integration tests:
+
+```bash
+# Run all tests
+./tools/esp32_devtools.py test
+
+# Run only native tests (no hardware needed)
+./tools/esp32_devtools.py test --native
+
+# Run only hardware tests
+./tools/esp32_devtools.py test --hardware
+
+# Generate detailed test reports
+./tools/esp32_devtools.py test --report
+
+# Filter tests by name
+./tools/esp32_devtools.py test --filter test_wifi
 ```
 
 ## 🔧 Requirements

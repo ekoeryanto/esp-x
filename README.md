@@ -335,3 +335,44 @@ Created by 0x3 (http://github.com/0x3)
 ---
 
 Made with ❤️ by 0x3 - Professional ESP32 Framework
+
+## 🧪 Testing
+
+This project includes comprehensive testing capabilities:
+
+### Unit Testing
+
+The project uses Unity test framework and PlatformIO's built-in test runner:
+
+```bash
+# Run all tests
+platformio test
+
+# Run native tests only (no hardware required)
+platformio test -e test_desktop
+
+# Run complete test suite with report generation
+./tools/run_tests.sh
+```
+
+### Continuous Integration
+
+GitHub Actions CI is configured to:
+- Build the project for all supported ESP32 boards
+- Run unit tests in desktop environment
+- Run static code analysis
+- Generate test reports
+
+CI builds are triggered on:
+- Every push to main/master/develop branches
+- Every pull request to these branches
+- Manual trigger via GitHub Actions UI
+
+### Test Structure
+
+- `test/test_wifi_manager/` - WiFi Manager unit tests
+- `test/test_system_manager/` - System Manager unit tests
+- `test/test_integration/` - Integration tests across components
+- `test/test_utils.h` - Shared test utilities and mocks
+
+For more details, see the test files and CI configuration in `.github/workflows/ci.yml`.
